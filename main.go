@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net"
 	"net/http"
 	"flag"
 	"log"
@@ -13,6 +14,7 @@ import (
 var (
 	idp    = flag.String("idp", "", "OIDC IDP to point to")
 	domain = flag.String("domain", "", "domain names for which to answer") 
+	port   = flag.Int("port", 2306, "port to serve on")
 )
 
 type Response struct {
@@ -38,6 +40,7 @@ func main() {
 	atDomain := "@" + *domain
 	http.HandleFunc("/.well-known/webfinger", func(w http.ResponseWriter, r *http.Request) {
 		resource := r.URL.Query().Get("resource")
+		log.Printf("resource %q queried", resource)
 		email := strings.TrimPrefix(resource, "acct:")
 		if !strings.HasSuffix(email, atDomain) {
 			die(w)
@@ -60,5 +63,10 @@ func main() {
 			},
 		})
 	})
-	log.Fatal(http.ListenAndServe(":9090", nil))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("invalid path: %q", r.URL.String())
+		http.Error(w, "not found", 404)
+	})
+	log.Printf("running")
+	log.Fatal(http.ListenAndServe(net.JoinHostPort("", fmt.Sprintf("%v", *port)), nil))
 }

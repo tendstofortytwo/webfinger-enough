@@ -5,7 +5,7 @@ just enough webfinger that [Tailscale](https://tailscale.com/kb/1240/sso-custom-
 usage:
 
 ```
-go run . -idp=https://idp.nsood.in -domain=nsood.in
+go run . -idp=https://idp.nsood.in -domain=nsood.in -port 9090
 ```
 
 will start an HTTP server on port 9090 that responds to `acct:<username>@nsood.in`.
